@@ -1,0 +1,1 @@
+$(CROSS_PREFIX)-gcc -o out/main main.c
