@@ -1,2 +1,3 @@
-main:main.c
-	$(CROSS_PREFIX)-gcc -o out/$@ $^
+out/main:main.c
+	mkdir -p $(dir $@)
+	$(CROSS_PREFIX)-gcc -o $@ $^
