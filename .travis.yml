@@ -1,0 +1,32 @@
+# One may have a look at http://docs.travis-ci.com/user/installing-dependencies/
+
+notifications:
+  - email: true
+
+# Installation of ia32 libs, required by the compiler
+before_install:
+  - sudo apt-get update -qq
+  - if [ `uname -m` = x86_64 ]; then sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch; fi
+
+before_script:
+  # Store the home repository
+  - export MYHOME=$PWD
+
+  # Download the arm compiler to use
+  - wget http://releases.linaro.org/14.05/components/toolchain/binaries/gcc-linaro-arm-linux-gnueabihf-4.9-2014.05_linux.tar.xz
+  - tar xf gcc-linaro-arm-linux-gnueabihf-4.9-2014.05_linux.tar.xz
+  - export PATH=$PATH:$PWD/gcc-linaro-arm-linux-gnueabihf-4.9-2014.05_linux/bin
+
+  # Download checkpatch.pl
+  - export DST_KERNEL=$PWD/linux && mkdir -p $DST_KERNEL/scripts && cd $DST_KERNEL/scripts
+  - wget https://raw.githubusercontent.com/torvalds/linux/master/scripts/checkpatch.pl && chmod a+x checkpatch.pl
+  - wget https://raw.githubusercontent.com/torvalds/linux/master/scripts/spelling.txt
+  - cd $MYHOME
+
+# Several compilation options are checked
+script:
+  # Run checkpatch.pl
+  - git format-patch -1 --stdout | $DST_KERNEL/scripts/checkpatch.pl --ignore FILE_PATH_CHANGES --no-tree -
+
+  # Make
+  - CROSS_PREFIX=arm-linux-gnueabihf  make
